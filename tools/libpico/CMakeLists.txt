@@ -76,6 +76,7 @@ target_link_libraries(pico
 	tinyusb_device_unmarked
 	pico_audio
 	pico_audio_i2s
+	pico_cyw43_arch_lwip_poll
 )
 
 add_custom_command(TARGET pico POST_BUILD

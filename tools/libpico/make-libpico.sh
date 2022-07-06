@@ -12,11 +12,12 @@ cmake ..
 make -j
 mv libpico.a ../../../lib/.
 mv generated/pico_base/pico/version.h ../../../lib/pico_base/pico/.
+mv pico-sdk/src/rp2_common/cyw43_driver/cyw43_resource.o ../../../lib/.
 
 rm -rf boot
 mkdir boot
 cd boot
-mkdir -p pico 
+mkdir -p pico
 touch pico/config.h
 for type in boot2_generic_03h boot2_is25lp080 boot2_w25q080 boot2_w25x10cl; do
     for div in 2 4; do
@@ -32,7 +33,7 @@ for type in boot2_generic_03h boot2_is25lp080 boot2_w25q080 boot2_w25x10cl; do
         arm-none-eabi-gcc -march=armv6-m -mcpu=cortex-m0plus -mthumb -O3 \
                           -DNDEBUG -Wl,--build-id=none --specs=nosys.specs -nostartfiles \
                           -Wl,--script="$PICO_SDK_PATH/src/rp2_common/boot_stage2/boot_stage2.ld" \
-                          -Wl,-Map=$type.$div.elf.map $type.o -o $type.$div.elf 
+                          -Wl,-Map=$type.$div.elf.map $type.o -o $type.$div.elf
 
         arm-none-eabi-objdump -h $type.$div.elf >  $type.$div.dis
         arm-none-eabi-objdump -d $type.$div.elf >> $type.$div.dis

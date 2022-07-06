@@ -22,7 +22,7 @@ board = env.BoardConfig()
 upload_protocol = env.subst("$UPLOAD_PROTOCOL") or "picotool"
 #ram_size = board.get("upload.maximum_ram_size") # PlatformIO gives 264K here
 # override to correct 256K for RAM section in linkerscript
-ram_size = 256 * 1024 # not the 264K, which is 256K SRAM + 2*4K SCRATCH(X/Y). 
+ram_size = 256 * 1024 # not the 264K, which is 256K SRAM + 2*4K SCRATCH(X/Y).
 
 FRAMEWORK_DIR = platform.get_package_dir("framework-arduinopico")
 assert os.path.isdir(FRAMEWORK_DIR)
@@ -67,7 +67,7 @@ else:
 #
 # RTTI
 #
-# standard is -fno-rtti flag. If special macro is present, don't 
+# standard is -fno-rtti flag. If special macro is present, don't
 # add that flag.
 if not "PIO_FRAMEWORK_ARDUINO_ENABLE_RTTI" in flatten_cppdefines:
     env.Append(
@@ -132,15 +132,16 @@ env.Append(
 
     LIBSOURCE_DIRS=[os.path.join(FRAMEWORK_DIR, "libraries")],
 
-    # do **NOT** Add lib to LIBPATH, otherwise 
-    # erroneous libstdc++.a will be found that crashes! 
+    # do **NOT** Add lib to LIBPATH, otherwise
+    # erroneous libstdc++.a will be found that crashes!
     #LIBPATH=[
     #    os.path.join(FRAMEWORK_DIR, "lib")
     #],
 
     # link lib/libpico.a by full path, ignore libstdc++
     LIBS=[
-        File(os.path.join(FRAMEWORK_DIR, "lib", "libpico.a")), 
+        File(os.path.join(FRAMEWORK_DIR, "lib", "cyw43_resource.o")),
+        File(os.path.join(FRAMEWORK_DIR, "lib", "libpico.a")),
         "m", "c", stdcpp_lib, "c"]
 )
 
@@ -167,7 +168,7 @@ def configure_usb_flags(cpp_defines):
             CPPPATH=[os.path.join(FRAMEWORK_DIR, "tools", "libpico")],
             CPPDEFINES=[
                 "NO_USB",
-                "DISABLE_USB_SERIAL" 
+                "DISABLE_USB_SERIAL"
             ]
         )
         # do not further add more USB flags or update sizes. no USB used.
@@ -187,13 +188,13 @@ def configure_usb_flags(cpp_defines):
     usb_product = board.get(
         "build.arduino.earlephilhower.usb_product", board.get("name", "Pico"))
 
-    # Copy logic from makeboards.py. 
+    # Copy logic from makeboards.py.
     # Depending on whether a certain upload / debug method is used, change
     # the PID/VID.
     # https://github.com/earlephilhower/arduino-pico/blob/master/tools/makeboards.py
     vidtouse = usb_vid
     pidtouse = usb_pid
-    if upload_protocol == "picoprobe": 
+    if upload_protocol == "picoprobe":
         pidtouse = '0x0004'
     elif upload_protocol == "picodebug":
         vidtouse = '0x1209'
@@ -213,7 +214,7 @@ def configure_usb_flags(cpp_defines):
         env.Append(CPPDEFINES=[("USBD_MAX_POWER_MA", 500)])
         print("Warning: Undefined USBD_MAX_OWER_MA, assuming 500mA")
 
-    # use vidtouse and pidtouse 
+    # use vidtouse and pidtouse
     # for USB PID/VID autodetection
     hw_ids = board.get("build.hwids", [["0x2E8A", "0x00C0"]])
     hw_ids[0][0] = vidtouse
@@ -240,9 +241,9 @@ if not "USE_TINYUSB" in cpp_defines:
 # configure USB stuff
 configure_usb_flags(cpp_defines)
 
-# info about the filesystem is already parsed by the platform's main.py 
+# info about the filesystem is already parsed by the platform's main.py
 # script. We can just use the info here
- 
+
 linkerscript_cmd = env.Command(
     os.path.join("$BUILD_DIR", "memmap_default.ld"),  # $TARGET
     os.path.join(FRAMEWORK_DIR, "lib", "memmap_default.ld"),  # $SOURCE
